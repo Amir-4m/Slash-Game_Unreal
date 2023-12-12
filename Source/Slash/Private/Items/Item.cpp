@@ -10,6 +10,9 @@ AItem::AItem()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
+	RootComponent = ItemMesh;
+
 }
 
 // Called when the game starts or when spawned
@@ -17,18 +20,38 @@ void AItem::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	UWorld* world = GetWorld();
-	FVector Location = GetActorLocation();
-	FVector Forward = GetActorForwardVector();
+}
 
-	DRAW_SPHERE(Location);
-	DRAW_VECTOR(Location, Location + Forward * 100.f);
+float AItem::TransformedSin()
+{
+	return Amplitude * FMath::Sin(RunningTime * TimeConstant);
+}
+
+float AItem::TransformedCos()
+{
+	return Amplitude * FMath::Cos(RunningTime * TimeConstant);
 }
 
 // Called every frame
 void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	// Movement rate in units of cm/s
+	// float MovementRate = 50.f;
+	// float RotateRate = 45.f;
+
+	// MovementRate * DeltaTime (cm/s) * (s/frame) = (cm/frame)
+	// AddActorWorldOffset(FVector(MovementRate * DeltaTime, 0.f, 0.f));
+	// AddActorWorldRotation(FRotator(0.f, RotateRate * DeltaTime, 0.f));
+
+	RunningTime += DeltaTime;
+
+	float DeltaZ = TransformedSin();
+
+	AddActorWorldOffset(FVector(0.f, 0.f, DeltaZ));
+	DRAW_SPHERE_SingleFrame(GetActorLocation());
+	DRAW_VECTOR_SingleFrame(GetActorLocation(), GetActorLocation() + GetActorForwardVector() * 100.f);
+
 
 }
 
